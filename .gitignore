@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+passwords.csv
+passwords.txt
