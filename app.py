@@ -35,9 +35,22 @@ def process_credentials(file, host, port):
 
         success = []  # Successful logins
         failed = []  # Failed logins
+        malformatted = []  # Malformatted rows
 
         # Process each credential
-        for email, password in tqdm.tqdm(credentials):
+        for row in tqdm.tqdm(credentials):
+            if len(row) != 2:
+                # Log malformatted rows
+                malformatted.append(
+                    {
+                        "email": row[0] if len(row) > 0 else "Unknown",
+                        "status": "malformatted",
+                        "error": "Row does not contain exactly two values",
+                    }
+                )
+                continue
+
+            email, password = row
             try:
                 # Attempt SMTP login
                 server = smtplib.SMTP(host, port)
@@ -56,7 +69,11 @@ def process_credentials(file, host, port):
             except Exception as ex:
                 failed.append({"email": email, "status": "failed", "error": str(ex)})
 
-        return {"success": success, "failed": failed}, None
+        return {
+            "success": success,
+            "failed": failed,
+            "malformatted": malformatted,
+        }, None
 
     except Exception as e:
         return None, str(e)
